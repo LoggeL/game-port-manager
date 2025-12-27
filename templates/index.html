@@ -5,188 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Port Manager</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-color: #1a1b1e;
-            --card-bg: #25262b;
-            --text-primary: #c1c2c5;
-            --text-secondary: #909296;
-            --accent: #339af0;
-            --danger: #ff6b6b;
-            --border: #373a40;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 2rem;
-            line-height: 1.5;
+        .animate-gradient {
+            background: linear-gradient(270deg, #3b82f6, #8b5cf6, #ec4899);
+            background-size: 600% 600%;
+            animation: gradientShift 12s ease infinite;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        .header h1 { margin: 0; color: white; }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.9rem;
-        }
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-secondary);
-            text-decoration: none;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-        }
-        .logout-btn:hover { color: var(--danger); border-color: var(--danger); }
-        .card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border);
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        input, select {
-            width: 100%;
-            padding: 0.5rem;
-            background: #141517;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: white;
-            box-sizing: border-box;
-        }
-        button {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        button:hover { opacity: 0.9; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            text-align: left;
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-        th { color: var(--text-secondary); font-weight: 500; }
-        .badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .badge-tcp { background: #1864ab; color: #d0ebff; }
-        .badge-udp { background: #e67700; color: #fff4e6; }
-        .btn-danger {
-            background: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-        .btn-danger:hover { background: rgba(255, 107, 107, 0.1); }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎮 Game Port Manager</h1>
-            <div class="user-info">
-                <span>Logged in as <strong>{{ user }}</strong></span>
-                <a href="/logout" class="logout-btn">Logout</a>
+<body class="text-slate-200 min-h-screen pb-12">
+    <!-- Navbar -->
+    <nav class="glass sticky top-0 z-50 px-6 py-4 mb-8">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🎮</span>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    Game Port Manager
+                </h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="hidden sm:flex items-center gap-2 text-sm text-slate-400">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span>Host: <strong>mx11</strong></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium">@{{ user }}</span>
+                    <a href="/logout" class="text-sm px-4 py-2 rounded-lg bg-slate-800 hover:bg-red-900/30 hover:text-red-400 border border-slate-700 transition-all">
+                        Logout
+                    </a>
+                </div>
             </div>
         </div>
-        
-        <div class="card">
-            <h3 style="margin-top: 0;">Add New Rule</h3>
-            <form action="/add" method="post" style="display: grid; grid-template-columns: 1fr 1fr 1fr 2fr auto; gap: 1rem; align-items: end;">
-                <div>
-                    <label>Public Port</label>
-                    <input type="number" name="port" placeholder="25565" required>
-                </div>
-                <div>
-                    <label>Target Port</label>
-                    <input type="number" name="toport" placeholder="(Optional)">
-                </div>
-                <div>
-                    <label>Protocol</label>
-                    <select name="protocol">
-                        <option value="both">TCP & UDP</option>
-                        <option value="tcp">TCP</option>
-                        <option value="udp">UDP</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Target IP (Tailscale)</label>
-                    <input type="text" name="toaddr" placeholder="100.x.x.x" required>
-                </div>
-                <button type="submit">Add Rule</button>
-            </form>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-6 space-y-8">
+        <!-- Stats/Header -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass p-6 rounded-2xl">
+                <p class="text-slate-400 text-sm mb-1">Active Rules</p>
+                <p class="text-3xl font-bold">{{ rules|length }}</p>
+            </div>
+            <div class="glass p-6 rounded-2xl">
+                <p class="text-slate-400 text-sm mb-1">Public IP</p>
+                <p class="text-xl font-mono font-bold text-blue-400">logge.top</p>
+            </div>
+            <div class="glass p-6 rounded-2xl">
+                <p class="text-slate-400 text-sm mb-1">Tailscale</p>
+                <p class="text-xl font-bold text-purple-400">Connected</p>
+            </div>
         </div>
 
-        <div class="card">
-            <h3 style="margin-top: 0;">Active Forwarding Rules</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Public Port</th>
-                        <th>Proto</th>
-                        <th>Target</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for rule in rules %}
-                    <tr>
-                        <td>{{ rule.port }}</td>
-                        <td>
-                            <span class="badge badge-{{ rule.proto }}">{{ rule.proto }}</span>
-                        </td>
-                        <td>{{ rule.toaddr }}:{{ rule.toport }}</td>
-                        <td>
-                            <form action="/delete" method="post" style="margin: 0;">
-                                <input type="hidden" name="port" value="{{ rule.port }}">
-                                <input type="hidden" name="proto" value="{{ rule.proto }}">
-                                <input type="hidden" name="toport" value="{{ rule.toport }}">
-                                <input type="hidden" name="toaddr" value="{{ rule.toaddr }}">
-                                <button type="submit" class="btn-danger">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-secondary);">No active forwarding rules found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+        <!-- Add Rule Section -->
+        <section class="glass p-8 rounded-2xl shadow-xl">
+            <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                <span class="text-blue-400">✚</span> Add New Forwarding Rule
+            </h2>
+            <form action="/add" method="post" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Public Port</label>
+                    <input type="number" name="port" placeholder="25565" required 
+                           class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target Port</label>
+                    <input type="number" name="toport" placeholder="Leave empty for same"
+                           class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Protocol</label>
+                    <select name="protocol" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none">
+                        <option value="both">TCP & UDP</option>
+                        <option value="tcp">TCP Only</option>
+                        <option value="udp">UDP Only</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target IP (Tailscale)</label>
+                    <input type="text" name="toaddr" placeholder="100.x.x.x" required
+                           class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                </div>
+                <div class="md:col-span-4 flex justify-end">
+                    <button type="submit" class="animate-gradient px-8 py-3 rounded-xl font-bold text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all">
+                        Create Rule
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Rules Table -->
+        <section class="glass rounded-2xl overflow-hidden shadow-xl">
+            <div class="px-8 py-6 border-b border-white/5 bg-white/5">
+                <h2 class="text-xl font-semibold">Active Rules</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-900/30 text-slate-400 text-xs uppercase tracking-widest">
+                        <tr>
+                            <th class="px-8 py-4 text-left font-semibold">External</th>
+                            <th class="px-8 py-4 text-left font-semibold">Protocol</th>
+                            <th class="px-8 py-4 text-left font-semibold">Internal Destination</th>
+                            <th class="px-8 py-4 text-right font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for rule in rules %}
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-8 py-6 font-mono font-bold text-blue-400">
+                                :{{ rule.port }}
+                            </td>
+                            <td class="px-8 py-6">
+                                {% if rule.proto == 'tcp' %}
+                                <span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">TCP</span>
+                                {% elif rule.proto == 'udp' %}
+                                <span class="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">UDP</span>
+                                {% else %}
+                                <span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">{{ rule.proto }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex flex-col">
+                                    <span class="text-slate-200 font-medium">{{ rule.toaddr }}</span>
+                                    <span class="text-slate-500 text-xs">Port: {{ rule.toport }}</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <form action="/delete" method="post" class="inline">
+                                    <input type="hidden" name="port" value="{{ rule.port }}">
+                                    <input type="hidden" name="proto" value="{{ rule.proto }}">
+                                    <input type="hidden" name="toport" value="{{ rule.toport }}">
+                                    <input type="hidden" name="toaddr" value="{{ rule.toaddr }}">
+                                    <button type="submit" class="text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 border border-red-400/20 px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="px-8 py-12 text-center text-slate-500">
+                                <div class="flex flex-col items-center gap-3">
+                                    <span class="text-4xl opacity-20">🛡️</span>
+                                    <p>No active rules found. Your firewall is clean.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-12 text-center text-slate-500 text-sm">
+        <p>© 2025 Game Port Manager • Powered by Fedora & FastAPI</p>
+    </footer>
 </body>
 </html>
