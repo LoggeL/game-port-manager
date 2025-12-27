@@ -24,6 +24,10 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+        .tab-active {
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
     </style>
 </head>
 <body class="text-slate-200 min-h-screen pb-12">
@@ -39,7 +43,7 @@
             <div class="flex items-center gap-6">
                 <div class="hidden sm:flex items-center gap-2 text-sm text-slate-400">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span>Host: <strong>mx11</strong></span>
+                    <span>Host: <strong>logge.top</strong></span>
                 </div>
                 <div class="flex items-center gap-4">
                     <span class="text-sm font-medium">@{{ user }}</span>
@@ -52,125 +56,355 @@
     </nav>
 
     <main class="max-w-5xl mx-auto px-6 space-y-8">
-        <!-- Stats/Header -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="glass p-6 rounded-2xl">
-                <p class="text-slate-400 text-sm mb-1">Active Rules</p>
-                <p class="text-3xl font-bold">{{ rules|length }}</p>
-            </div>
-            <div class="glass p-6 rounded-2xl">
-                <p class="text-slate-400 text-sm mb-1">Public IP</p>
-                <p class="text-xl font-mono font-bold text-blue-400">logge.top</p>
-            </div>
-            <div class="glass p-6 rounded-2xl">
-                <p class="text-slate-400 text-sm mb-1">Tailscale</p>
-                <p class="text-xl font-bold text-purple-400">Connected</p>
-            </div>
+        <!-- Tabs -->
+        <div class="flex gap-6 border-b border-slate-700">
+            <button onclick="showTab('ports')" id="tab-ports" class="tab-active pb-3 px-2 font-medium transition-colors">
+                🔌 Port Forwarding
+            </button>
+            <button onclick="showTab('domains')" id="tab-domains" class="pb-3 px-2 font-medium text-slate-400 hover:text-slate-200 transition-colors">
+                🌐 Custom Domains
+            </button>
         </div>
 
-        <!-- Add Rule Section -->
-        <section class="glass p-8 rounded-2xl shadow-xl">
-            <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
-                <span class="text-blue-400">✚</span> Add New Forwarding Rule
-            </h2>
-            <form action="/add" method="post" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Public Port</label>
-                    <input type="number" name="port" placeholder="25565" required 
-                           class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+        <!-- Port Forwarding Tab -->
+        <div id="content-ports">
+            <!-- Stats/Header -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass p-6 rounded-2xl">
+                    <p class="text-slate-400 text-sm mb-1">Active Rules</p>
+                    <p class="text-3xl font-bold">{{ rules|length }}</p>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target Port</label>
-                    <input type="number" name="toport" placeholder="Leave empty for same"
-                           class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                <div class="glass p-6 rounded-2xl">
+                    <p class="text-slate-400 text-sm mb-1">Public IP</p>
+                    <p class="text-xl font-mono font-bold text-blue-400">logge.top</p>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Protocol</label>
-                    <select name="protocol" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none">
-                        <option value="both">TCP & UDP</option>
-                        <option value="tcp">TCP Only</option>
-                        <option value="udp">UDP Only</option>
-                    </select>
+                <div class="glass p-6 rounded-2xl">
+                    <p class="text-slate-400 text-sm mb-1">Tailscale</p>
+                    <p class="text-xl font-bold text-purple-400">Connected</p>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target IP (Tailscale)</label>
-                    <input type="text" name="toaddr" placeholder="100.x.x.x" required
-                           class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
-                </div>
-                <div class="md:col-span-4 flex justify-end">
-                    <button type="submit" class="animate-gradient px-8 py-3 rounded-xl font-bold text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all">
-                        Create Rule
-                    </button>
-                </div>
-            </form>
-        </section>
+            </div>
 
-        <!-- Rules Table -->
-        <section class="glass rounded-2xl overflow-hidden shadow-xl">
-            <div class="px-8 py-6 border-b border-white/5 bg-white/5">
-                <h2 class="text-xl font-semibold">Active Rules</h2>
+            <!-- Add Rule Section -->
+            <section class="glass p-8 rounded-2xl shadow-xl mb-8">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <span class="text-blue-400">✚</span> Add New Forwarding Rule
+                </h2>
+                <form action="/add" method="post" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Public Port</label>
+                        <input type="number" name="port" placeholder="25565" required 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target Port</label>
+                        <input type="number" name="toport" placeholder="Leave empty for same"
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Protocol</label>
+                        <select name="protocol" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none">
+                            <option value="both">TCP & UDP</option>
+                            <option value="tcp">TCP Only</option>
+                            <option value="udp">UDP Only</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target IP (Tailscale)</label>
+                        <input type="text" name="toaddr" placeholder="100.x.x.x" required
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                    </div>
+                    <div class="md:col-span-4 flex justify-end">
+                        <button type="submit" class="animate-gradient px-8 py-3 rounded-xl font-bold text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all">
+                            Create Rule
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Rules Table -->
+            <section class="glass rounded-2xl overflow-hidden shadow-xl">
+                <div class="px-8 py-6 border-b border-white/5 bg-white/5">
+                    <h2 class="text-xl font-semibold">Active Rules</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-900/30 text-slate-400 text-xs uppercase tracking-widest">
+                            <tr>
+                                <th class="px-8 py-4 text-left font-semibold">External</th>
+                                <th class="px-8 py-4 text-left font-semibold">Protocol</th>
+                                <th class="px-8 py-4 text-left font-semibold">Internal Destination</th>
+                                <th class="px-8 py-4 text-right font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for rule in rules %}
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-8 py-6 font-mono font-bold text-blue-400">
+                                    :{{ rule.port }}
+                                </td>
+                                <td class="px-8 py-6">
+                                    {% if rule.proto == 'tcp' %}
+                                    <span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">TCP</span>
+                                    {% elif rule.proto == 'udp' %}
+                                    <span class="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">UDP</span>
+                                    {% else %}
+                                    <span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">{{ rule.proto }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-200 font-medium">{{ rule.toaddr }}</span>
+                                        <span class="text-slate-500 text-xs">Port: {{ rule.toport }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6 text-right">
+                                    <form action="/delete" method="post" class="inline">
+                                        <input type="hidden" name="port" value="{{ rule.port }}">
+                                        <input type="hidden" name="proto" value="{{ rule.proto }}">
+                                        <input type="hidden" name="toport" value="{{ rule.toport }}">
+                                        <input type="hidden" name="toaddr" value="{{ rule.toaddr }}">
+                                        <button type="submit" class="text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 border border-red-400/20 px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="px-8 py-12 text-center text-slate-500">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <span class="text-4xl opacity-20">🛡️</span>
+                                        <p>No active rules found. Your firewall is clean.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- Custom Domains Tab -->
+        <div id="content-domains" class="hidden">
+            {% if not npm_configured %}
+            <!-- NPM Config Required -->
+            <section class="glass p-8 rounded-2xl shadow-xl mb-8">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <span class="text-yellow-400">⚙️</span> Configure Nginx Proxy Manager
+                </h2>
+                <p class="text-slate-400 mb-6">To manage custom domains, you need to configure access to Nginx Proxy Manager.</p>
+                <form action="/npm/config" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">NPM Admin Email</label>
+                        <input type="email" name="npm_email" placeholder="admin@example.com" required 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">NPM Admin Password</label>
+                        <input type="password" name="npm_password" placeholder="••••••••" required
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                    </div>
+                    <div class="md:col-span-2 flex justify-end">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-xl font-bold text-white shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+                            Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </section>
+            {% else %}
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass p-6 rounded-2xl">
+                    <p class="text-slate-400 text-sm mb-1">Custom Domains</p>
+                    <p class="text-3xl font-bold">{{ custom_domains|length }}</p>
+                </div>
+                <div class="glass p-6 rounded-2xl">
+                    <p class="text-slate-400 text-sm mb-1">Proxy Hosts</p>
+                    <p class="text-3xl font-bold">{{ proxy_hosts|length }}</p>
+                </div>
+                <div class="glass p-6 rounded-2xl">
+                    <p class="text-slate-400 text-sm mb-1">NPM Status</p>
+                    <p class="text-xl font-bold text-green-400">Connected</p>
+                </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-slate-900/30 text-slate-400 text-xs uppercase tracking-widest">
-                        <tr>
-                            <th class="px-8 py-4 text-left font-semibold">External</th>
-                            <th class="px-8 py-4 text-left font-semibold">Protocol</th>
-                            <th class="px-8 py-4 text-left font-semibold">Internal Destination</th>
-                            <th class="px-8 py-4 text-right font-semibold">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/5">
-                        {% for rule in rules %}
-                        <tr class="hover:bg-white/5 transition-colors">
-                            <td class="px-8 py-6 font-mono font-bold text-blue-400">
-                                :{{ rule.port }}
-                            </td>
-                            <td class="px-8 py-6">
-                                {% if rule.proto == 'tcp' %}
-                                <span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">TCP</span>
-                                {% elif rule.proto == 'udp' %}
-                                <span class="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">UDP</span>
-                                {% else %}
-                                <span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase">{{ rule.proto }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-8 py-6">
-                                <div class="flex flex-col">
-                                    <span class="text-slate-200 font-medium">{{ rule.toaddr }}</span>
-                                    <span class="text-slate-500 text-xs">Port: {{ rule.toport }}</span>
-                                </div>
-                            </td>
-                            <td class="px-8 py-6 text-right">
-                                <form action="/delete" method="post" class="inline">
-                                    <input type="hidden" name="port" value="{{ rule.port }}">
-                                    <input type="hidden" name="proto" value="{{ rule.proto }}">
-                                    <input type="hidden" name="toport" value="{{ rule.toport }}">
-                                    <input type="hidden" name="toaddr" value="{{ rule.toaddr }}">
-                                    <button type="submit" class="text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 border border-red-400/20 px-4 py-2 rounded-lg text-sm font-medium transition-all">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" class="px-8 py-12 text-center text-slate-500">
-                                <div class="flex flex-col items-center gap-3">
-                                    <span class="text-4xl opacity-20">🛡️</span>
-                                    <p>No active rules found. Your firewall is clean.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
+
+            <!-- Add Domain Section -->
+            <section class="glass p-8 rounded-2xl shadow-xl mb-8">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <span class="text-green-400">✚</span> Add Custom Domain
+                </h2>
+                <p class="text-slate-400 text-sm mb-6">Add your domain as an alias to an existing proxy host. Make sure your domain's DNS points to this server first.</p>
+                <form action="/domains/add" method="post" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end" id="domain-form">
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Your Domain</label>
+                        <input type="text" name="domain" id="domain-input" placeholder="example.com" required 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target Service</label>
+                        <select name="proxy_host_id" required class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all appearance-none">
+                            <option value="">Select a proxy host...</option>
+                            {% for host in proxy_hosts %}
+                            <option value="{{ host.id }}">{{ host.domain_names[0] if host.domain_names else 'Host #' + host.id|string }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="testDomain()" class="bg-yellow-600 hover:bg-yellow-700 px-6 py-3 rounded-xl font-bold text-white shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+                            Test DNS
+                        </button>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 px-8 py-3 rounded-xl font-bold text-white shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+                            Add Domain
+                        </button>
+                    </div>
+                </form>
+                <!-- Test Results -->
+                <div id="test-results" class="hidden mt-6 p-4 rounded-xl border"></div>
+            </section>
+
+            <!-- Custom Domains Table -->
+            <section class="glass rounded-2xl overflow-hidden shadow-xl">
+                <div class="px-8 py-6 border-b border-white/5 bg-white/5">
+                    <h2 class="text-xl font-semibold">Your Custom Domains</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-900/30 text-slate-400 text-xs uppercase tracking-widest">
+                            <tr>
+                                <th class="px-8 py-4 text-left font-semibold">Domain</th>
+                                <th class="px-8 py-4 text-left font-semibold">Target Service</th>
+                                <th class="px-8 py-4 text-left font-semibold">Added</th>
+                                <th class="px-8 py-4 text-right font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for domain in custom_domains %}
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-8 py-6 font-mono font-bold text-green-400">
+                                    {{ domain.domain }}
+                                </td>
+                                <td class="px-8 py-6">
+                                    <span class="text-slate-300">{{ domain.proxy_host_name }}</span>
+                                </td>
+                                <td class="px-8 py-6 text-slate-400 text-sm">
+                                    {{ domain.created_at[:10] if domain.created_at else 'Unknown' }}
+                                </td>
+                                <td class="px-8 py-6 text-right">
+                                    <form action="/domains/delete" method="post" class="inline" onsubmit="return confirm('Remove this domain from the proxy host?');">
+                                        <input type="hidden" name="domain_id" value="{{ domain.id }}">
+                                        <button type="submit" class="text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 border border-red-400/20 px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="px-8 py-12 text-center text-slate-500">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <span class="text-4xl opacity-20">🌐</span>
+                                        <p>No custom domains added yet.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            {% endif %}
+        </div>
     </main>
 
     <footer class="mt-12 text-center text-slate-500 text-sm">
-        <p>© 2025 Game Port Manager • Powered by Fedora & FastAPI</p>
+        <p>&copy; 2025 Game Port Manager &bull; Powered by Fedora & FastAPI</p>
     </footer>
+
+    <script>
+        function showTab(tab) {
+            // Hide all content
+            document.getElementById('content-ports').classList.add('hidden');
+            document.getElementById('content-domains').classList.add('hidden');
+            
+            // Remove active from all tabs
+            document.getElementById('tab-ports').classList.remove('tab-active');
+            document.getElementById('tab-ports').classList.add('text-slate-400');
+            document.getElementById('tab-domains').classList.remove('tab-active');
+            document.getElementById('tab-domains').classList.add('text-slate-400');
+            
+            // Show selected content and activate tab
+            document.getElementById('content-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.add('tab-active');
+            document.getElementById('tab-' + tab).classList.remove('text-slate-400');
+        }
+
+        async function testDomain() {
+            const domain = document.getElementById('domain-input').value.trim();
+            const resultsDiv = document.getElementById('test-results');
+            
+            if (!domain) {
+                resultsDiv.innerHTML = '<p class="text-yellow-400">Please enter a domain first.</p>';
+                resultsDiv.className = 'mt-6 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10';
+                resultsDiv.classList.remove('hidden');
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<p class="text-slate-400">Testing domain...</p>';
+            resultsDiv.className = 'mt-6 p-4 rounded-xl border border-slate-600 bg-slate-800/50';
+            resultsDiv.classList.remove('hidden');
+            
+            try {
+                const resp = await fetch(`/api/test/domain/${encodeURIComponent(domain)}`);
+                const data = await resp.json();
+                
+                let html = '<div class="space-y-2">';
+                html += `<p class="font-semibold text-lg">${data.domain}</p>`;
+                
+                // DNS Status
+                if (data.dns_resolves) {
+                    html += `<p class="text-green-400">✓ DNS resolves to ${data.dns_ip}</p>`;
+                    if (data.points_to_server) {
+                        html += '<p class="text-green-400">✓ Points to this server</p>';
+                    } else {
+                        html += '<p class="text-yellow-400">⚠ Does not point to this server (might be using Cloudflare proxy)</p>';
+                    }
+                } else {
+                    html += '<p class="text-red-400">✗ DNS does not resolve</p>';
+                }
+                
+                // HTTP/HTTPS Status
+                if (data.http_reachable) {
+                    html += '<p class="text-green-400">✓ HTTP reachable</p>';
+                }
+                if (data.https_reachable) {
+                    html += '<p class="text-green-400">✓ HTTPS reachable</p>';
+                }
+                
+                // Errors
+                if (data.errors && data.errors.length > 0) {
+                    html += '<div class="mt-2 text-sm text-slate-400">';
+                    data.errors.forEach(e => {
+                        html += `<p>• ${e}</p>`;
+                    });
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+                
+                const isGood = data.dns_resolves && (data.points_to_server || data.http_reachable || data.https_reachable);
+                resultsDiv.innerHTML = html;
+                resultsDiv.className = isGood 
+                    ? 'mt-6 p-4 rounded-xl border border-green-500/30 bg-green-500/10'
+                    : 'mt-6 p-4 rounded-xl border border-red-500/30 bg-red-500/10';
+                    
+            } catch (err) {
+                resultsDiv.innerHTML = `<p class="text-red-400">Error testing domain: ${err.message}</p>`;
+                resultsDiv.className = 'mt-6 p-4 rounded-xl border border-red-500/30 bg-red-500/10';
+            }
+        }
+    </script>
 </body>
 </html>

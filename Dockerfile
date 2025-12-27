@@ -7,7 +7,7 @@ RUN dnf install -y python3 python3-pip firewalld && \
 WORKDIR /app
 
 # Install python dependencies
-RUN pip3 install fastapi uvicorn python-multipart jinja2 passlib[bcrypt] python-jose[cryptography]
+RUN pip3 install fastapi uvicorn python-multipart jinja2 passlib[bcrypt] python-jose[cryptography] httpx
 
 # Copy application code
 COPY main.py .
